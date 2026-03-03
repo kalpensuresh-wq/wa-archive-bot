@@ -4,10 +4,10 @@ const express = require('express');
 const fs = require('fs');
 const pino = require('pino');
 
-const OWNER_ID = 1416745654; // ←←← ИЗМЕНИ! Напиши @userinfobot в Telegram
-const TG_TOKEN = '8464918489:AAForqwa3-ufbecAhmKNg7zzm3hXqL278Ok'; // ←←← ИЗМЕНИ!
+const OWNER_ID = 1416745654;
+const TG_TOKEN = '8464918489:AAForqwa3-ufbecAhmKNg7zzm3hXqL278Ok';
 
-const VIDEO_PATH = './video.mp4';
+const VIDEO_PATH = './video.mp4';   // ← видео будет здесь
 
 const tgBot = new TelegramBot(TG_TOKEN, { polling: true });
 const sockets = {};
@@ -15,13 +15,13 @@ const archivedChats = { acc1: [], acc2: [], acc3: [] };
 const indices = { acc1: 0, acc2: 0, acc3: 0 };
 const intervals = {};
 
-// Обфускация текста (анти-бан)
+// Обфускация текста
 function obfuscate(text) {
   const map = {'а':'a','б':'6','в':'B','г':'r','д':'g','е':'e','ё':'e','ж':'Ж','з':'3','и':'u','й':'u','к':'k','л':'JI','м':'M','н':'H','о':'o','п':'n','р':'p','с':'c','т':'T','у':'y','ф':'Ф','х':'x','ц':'u','ч':'4','ш':'w','щ':'w','ъ':'','ы':'bl','ь':'b','э':'3','ю':'yu','я':'ya','А':'A','Б':'B','В':'B','Г':'r','Д':'g','Е':'E','Ё':'E','З':'3','И':'U','Й':'U','К':'K','Л':'JI','М':'M','Н':'H','О':'O','П':'N','Р':'P','С':'C','Т':'T','У':'Y','Ф':'Ф','Х':'X','Ц':'U','Ч':'4','Ш':'W','Щ':'W','Ы':'Bl','Ь':'b','Э':'3','Ю':'Yu','Я':'Ya'};
   return text.split('').map(c => map[c] || c).join('');
 }
 
-// Получить все чаты из архива
+// Получить чаты из архива
 function getArchivedChats(sock) {
   if (!sock?.store?.chats) return [];
   return Array.from(sock.store.chats.values())
@@ -29,7 +29,7 @@ function getArchivedChats(sock) {
     .map(chat => chat.id);
 }
 
-// Запуск WhatsApp аккаунта
+// Запуск аккаунта
 async function startWA(name, phone = null) {
   const sessionPath = `./sessions/${name}`;
   if (!fs.existsSync(sessionPath)) fs.mkdirSync(sessionPath, { recursive: true });
@@ -41,8 +41,7 @@ async function startWA(name, phone = null) {
     auth: state,
     logger: logger,
     printQRInTerminal: false,
-    browser: ['Chrome', 'Safari', '10.15.7'],
-    markOnlineOnConnect: false
+    browser: ['Chrome', 'Safari', '10.15.7']
   });
 
   sock.ev.on('creds.update', saveCreds);
@@ -59,17 +58,16 @@ async function startWA(name, phone = null) {
 
   if (phone) {
     const code = await sock.requestPairingCode(phone.replace(/[^0-9]/g, ''));
-    tgBot.sendMessage(OWNER_ID, `🔑 Код для \( {name} ( \){phone}):\n\n${code}\n\nWhatsApp → Связанные устройства → Ввести код`);
+    tgBot.sendMessage(OWNER_ID, `🔑 Код для \( {name}:\n\n \){code}\n\nWhatsApp → Связанные устройства → Ввести код`);
   }
 }
 
-// Обновить список архивных чатов
 function refreshArchive(name, sock) {
   archivedChats[name] = getArchivedChats(sock);
   tgBot.sendMessage(OWNER_ID, `📁 ${name}: ${archivedChats[name].length} чатов в архиве`);
 }
 
-// Рассылка каждые 10 минут
+// Рассылка видео + текст в одном сообщении
 function startSender(name, sock) {
   if (intervals[name]) clearInterval(intervals[name]);
   intervals[name] = setInterval(() => {
@@ -78,8 +76,7 @@ function startSender(name, sock) {
 
     const idx = indices[name];
     const jid = chats[idx];
-    const rawText = "Привет из архива! Сейчас {time} 🔥".replace('{time}', new Date().toLocaleTimeString('ru-RU'));
-    const text = obfuscate(rawText);
+    const text = obfuscate(`Привет из архива! Сейчас ${new Date().toLocaleTimeString('ru-RU')} 🔥`);
 
     sock.sendMessage(jid, { 
       video: fs.readFileSync(VIDEO_PATH),
@@ -92,10 +89,10 @@ function startSender(name, sock) {
   }, 600000);
 }
 
-// Telegram команды
+// Команды
 tgBot.onText(/\/start/, (msg) => {
   if (msg.from.id !== OWNER_ID) return;
-  tgBot.sendMessage(msg.chat.id, `🚀 Бот запущен!\n\nКоманды:\n/connect acc1 +77001234567\n/refresh acc1\n/listarchive acc1\n/status`);
+  tgBot.sendMessage(msg.chat.id, `🚀 Бот работает!\nВидео + текст в одном сообщении\n\n/connect acc1 +77001234567\n/refresh acc1\n/listarchive acc1\n/status`);
 });
 
 tgBot.onText(/\/connect (.+?) (.+)/, async (msg, match) => {
