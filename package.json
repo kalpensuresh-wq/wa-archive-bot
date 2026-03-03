@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "@whiskeysockets/baileys": "^6.7.8",
-    "node-telegram-bot-api": "^0.66.1",
+    "node-telegram-bot-api": "^0.67.0",
     "express": "^4.19.2"
   }
 }
