@@ -5,9 +5,9 @@ const fs = require('fs');
 const pino = require('pino');
 
 const OWNER_ID = 1416745654;
-const TG_TOKEN = '8464918489:AAForqwa3-ufbecAhmKNg7zzm3hXqL278Ok';
+const TG_TOKEN = '8464918489:AAForqwa3-ufbecAhmKNg7zzm3hXqL27';
 
-const VIDEO_PATH = './video.mp4';   // ← видео будет здесь
+const VIDEO_PATH = './video.mp4';
 
 const tgBot = new TelegramBot(TG_TOKEN, { polling: true });
 const sockets = {};
