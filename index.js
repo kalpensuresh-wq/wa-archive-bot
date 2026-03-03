@@ -5,7 +5,7 @@ const fs = require('fs');
 const pino = require('pino');
 
 const OWNER_ID = 1416745654;
-const TG_TOKEN = '8464918489:AAForqwa3-ufbecAhmKNg7zzm3hXqL27';
+const TG_TOKEN = '8464918489:AAForqwa3-ufbecAhmKNg7zzm3hXqL278Ok';
 
 const VIDEO_PATH = './video.mp4';
 
