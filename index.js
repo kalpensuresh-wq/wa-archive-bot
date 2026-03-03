@@ -4,8 +4,8 @@ const express = require('express');
 const fs = require('fs');
 const pino = require('pino');
 
-const OWNER_ID = 123456789; // ←←← ИЗМЕНИ! Напиши @userinfobot в Telegram
-const TG_TOKEN = 'ТОКЕН_ИЗ_BOTFATHER'; // ←←← ИЗМЕНИ!
+const OWNER_ID = 1416745654; // ←←← ИЗМЕНИ! Напиши @userinfobot в Telegram
+const TG_TOKEN = '8464918489:AAForqwa3-ufbecAhmKNg7zzm3hXqL278Ok'; // ←←← ИЗМЕНИ!
 
 const VIDEO_PATH = './video.mp4';
 
