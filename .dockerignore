@@ -1,0 +1,8 @@
+node_modules
+dist
+.git
+.env
+*.log
+wa-sessions
+media
+.DS_Store
