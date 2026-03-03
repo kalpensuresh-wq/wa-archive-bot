@@ -1,0 +1,147 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id         Int      @id @default(autoincrement())
+  telegramId BigInt   @unique
+  username   String?
+  firstName  String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  broadcasts Broadcast[]
+}
+
+model WhatsAppAccount {
+  id           String   @id @default(uuid())
+  name         String
+  phoneNumber  String?
+  sessionData  String?  @db.Text
+  status       AccountStatus @default(DISCONNECTED)
+  lastActivity DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  groups     WhatsAppGroup[]
+  broadcasts BroadcastAccount[]
+}
+
+enum AccountStatus {
+  DISCONNECTED
+  CONNECTING
+  QR_READY
+  CONNECTED
+  AUTH_FAILURE
+}
+
+model WhatsAppGroup {
+  id          String   @id @default(uuid())
+  waId        String
+  name        String
+  isArchived  Boolean  @default(true)
+  memberCount Int?
+  accountId   String
+  account     WhatsAppAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  broadcasts BroadcastGroup[]
+
+  @@unique([waId, accountId])
+}
+
+model MessageTemplate {
+  id        String   @id @default(uuid())
+  name      String
+  text      String   @db.Text
+  mediaUrl  String?
+  mediaType MediaType?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  broadcasts Broadcast[]
+}
+
+enum MediaType {
+  VIDEO
+  IMAGE
+  DOCUMENT
+}
+
+model Broadcast {
+  id          String          @id @default(uuid())
+  name        String
+  status      BroadcastStatus @default(DRAFT)
+  templateId  String?
+  template    MessageTemplate? @relation(fields: [templateId], references: [id])
+  customText  String?         @db.Text
+  mediaUrl    String?
+  mediaType   MediaType?
+  scheduledAt DateTime?
+  startedAt   DateTime?
+  completedAt DateTime?
+  adminId     Int
+  admin       Admin           @relation(fields: [adminId], references: [id])
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  accounts BroadcastAccount[]
+  groups   BroadcastGroup[]
+  logs     BroadcastLog[]
+}
+
+enum BroadcastStatus {
+  DRAFT
+  SCHEDULED
+  RUNNING
+  PAUSED
+  COMPLETED
+  FAILED
+}
+
+model BroadcastAccount {
+  id          String          @id @default(uuid())
+  broadcastId String
+  broadcast   Broadcast       @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
+  accountId   String
+  account     WhatsAppAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([broadcastId, accountId])
+}
+
+model BroadcastGroup {
+  id          String        @id @default(uuid())
+  broadcastId String
+  broadcast   Broadcast     @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
+  groupId     String
+  group       WhatsAppGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  status      SendStatus    @default(PENDING)
+  sentAt      DateTime?
+  error       String?
+
+  @@unique([broadcastId, groupId])
+}
+
+enum SendStatus {
+  PENDING
+  SENDING
+  SENT
+  FAILED
+}
+
+model BroadcastLog {
+  id          String    @id @default(uuid())
+  broadcastId String
+  broadcast   Broadcast @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
+  groupName   String
+  status      SendStatus
+  message     String?
+  createdAt   DateTime  @default(now())
+}
