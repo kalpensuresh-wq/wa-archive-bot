@@ -30,7 +30,7 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
 
-RUN npm ci
+RUN npm install
 
 RUN npx prisma generate
 
@@ -40,7 +40,8 @@ RUN npm run build
 
 RUN mkdir -p /app/wa-sessions /app/media && chmod -R 777 /app/wa-sessions /app/media
 
-ENV PORT=10000
-EXPOSE 10000
+ENV PORT=3000
+EXPOSE 3000
 
 CMD npx prisma migrate deploy && npm run start:prod
+```
